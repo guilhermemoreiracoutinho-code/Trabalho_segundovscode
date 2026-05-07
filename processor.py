@@ -1,24 +1,18 @@
-# processor.py
-
 from langdetect import detect
 
 
 def detetar_idioma(texto):
 
     try:
-
         return detect(texto)
 
     except:
-
         return "desconhecido"
 
 
 def formatar_texto(texto):
 
-    texto = texto.strip()
-
-    return texto
+    return texto.strip()
 
 
 def criar_chunks(texto, tamanho=500):
@@ -27,40 +21,38 @@ def criar_chunks(texto, tamanho=500):
 
     chunks = []
 
-    chunk_atual = ""
+    chunk = ""
 
     for palavra in palavras:
 
-        if len(chunk_atual) + len(palavra) < tamanho:
+        if len(chunk) + len(palavra) < tamanho:
 
-            chunk_atual += palavra + " "
+            chunk += palavra + " "
 
         else:
 
-            chunks.append(chunk_atual.strip())
+            chunks.append(chunk.strip())
 
-            chunk_atual = palavra + " "
+            chunk = palavra + " "
 
-    if chunk_atual:
-
-        chunks.append(chunk_atual.strip())
+    if chunk:
+        chunks.append(chunk.strip())
 
     return chunks
 
 
 def criar_prompt(texto, idioma):
 
-    prompt = f"""
+    return f"""
 Normaliza o seguinte texto em {idioma}.
 
 Objetivos:
 - corrigir erros gramaticais
 - melhorar pontuação
 - remover artefactos textuais
+- devolver em plain text
 - manter significado original
 
 Texto:
 {texto}
 """
-
-    return prompt

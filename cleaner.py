@@ -1,89 +1,72 @@
-# cleaner.py
-
 import re
 
 
-def remover_artefactos(texto):
+def limpar_texto(
+    texto,
+    usar_artefactos=True,
+    usar_cabecalhos=True,
+    usar_paragrafos=True,
+    usar_quebras=True,
+    usar_espacos=True
+):
 
-    texto = re.sub(
-        r"[^\x00-\x7FÀ-ÿ\n]",
-        " ",
-        texto
-    )
+    if usar_artefactos:
 
-    return texto
+        texto = re.sub(
+            r"[^\x00-\x7FÀ-ÿ\n]",
+            " ",
+            texto
+        )
 
+    if usar_cabecalhos:
 
-def reconstruir_paragrafos(texto):
+        linhas = texto.splitlines()
 
-    texto = re.sub(
-        r"\n(?=[a-zà-ÿ])",
-        " ",
-        texto
-    )
+        frequencia = {}
 
-    return texto
+        for linha in linhas:
 
+            linha_limpa = linha.strip()
 
-def remover_quebras_linha(texto):
+            if linha_limpa:
+                frequencia[linha_limpa] = frequencia.get(
+                    linha_limpa,
+                    0
+                ) + 1
 
-    texto = re.sub(
-        r"(?<!\n)\n(?!\n)",
-        " ",
-        texto
-    )
+        resultado = []
 
-    return texto
+        for linha in linhas:
 
+            if frequencia.get(linha.strip(), 0) < 3:
+                resultado.append(linha)
 
-def normalizar_espacos(texto):
+        texto = "\n".join(resultado)
 
-    texto = re.sub(
-        r"\s+",
-        " ",
-        texto
-    )
+    if usar_paragrafos:
 
-    return texto.strip()
+        texto = re.sub(
+            r"\n(?=[a-zà-ÿ])",
+            " ",
+            texto
+        )
 
+    if usar_quebras:
 
-def remover_cabecalhos(texto):
+        texto = re.sub(
+            r"(?<!\n)\n(?!\n)",
+            " ",
+            texto
+        )
 
-    linhas = texto.splitlines()
+    if usar_espacos:
 
-    frequencia = {}
+        texto = re.sub(
+            r"\s+",
+            " ",
+            texto
+        )
 
-    for linha in linhas:
-
-        linha_limpa = linha.strip()
-
-        if linha_limpa:
-
-            frequencia[linha_limpa] = (
-                frequencia.get(linha_limpa, 0) + 1
-            )
-
-    resultado = []
-
-    for linha in linhas:
-
-        if frequencia.get(linha.strip(), 0) < 3:
-
-            resultado.append(linha)
-
-    return "\n".join(resultado)
-
-
-def limpar_texto(texto):
-
-    texto = remover_artefactos(texto)
-
-    texto = remover_cabecalhos(texto)
-
-    texto = reconstruir_paragrafos(texto)
-
-    texto = remover_quebras_linha(texto)
-
-    texto = normalizar_espacos(texto)
+        texto = texto.strip()
 
     return texto
