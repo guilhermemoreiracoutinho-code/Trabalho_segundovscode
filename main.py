@@ -69,28 +69,28 @@ if uploaded_file:
             with col1:
                 usar_artefactos = st.checkbox(
                     "Remover artefactos",
-                    value=True
+                    value=False
                 )
 
                 usar_cabecalhos = st.checkbox(
                     "Remover cabeçalhos",
-                    value=True
+                    value=False
                 )
 
                 usar_paragrafos = st.checkbox(
                     "Reconstruir parágrafos",
-                    value=True
+                    value=False
                 )
 
             with col2:
                 usar_quebras = st.checkbox(
                     "Corrigir quebras de linha",
-                    value=True
+                    value=False
                 )
 
                 usar_espacos = st.checkbox(
                     "Normalizar espaços",
-                    value=True
+                    value=False
                 )
 
             texto_limpo = limpar_texto(
