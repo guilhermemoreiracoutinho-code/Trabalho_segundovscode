@@ -50,37 +50,44 @@ if uploaded_file:
             st.text_area(
                 "",
                 texto_bruto,
-                height=500
+                height=500,
+                key="texto_original"
             )
 
         with aba2:
 
-            st.sidebar.header("Configuração da Pipeline")
+            st.subheader("Configuração da Pipeline")
 
-            usar_artefactos = st.sidebar.checkbox(
-                "Remover artefactos",
-                True
-            )
+            col1, col2 = st.columns(2)
 
-            usar_cabecalhos = st.sidebar.checkbox(
-                "Remover cabeçalhos",
-                True
-            )
+            with col1:
 
-            usar_paragrafos = st.sidebar.checkbox(
-                "Reconstruir parágrafos",
-                True
-            )
+                usar_artefactos = st.checkbox(
+                    "Remover artefactos",
+                    value=True
+                )
 
-            usar_quebras = st.sidebar.checkbox(
-                "Corrigir quebras de linha",
-                True
-            )
+                usar_cabecalhos = st.checkbox(
+                    "Remover cabeçalhos",
+                    value=True
+                )
 
-            usar_espacos = st.sidebar.checkbox(
-                "Normalizar espaços",
-                True
-            )
+                usar_paragrafos = st.checkbox(
+                    "Reconstruir parágrafos",
+                    value=True
+                )
+
+            with col2:
+
+                usar_quebras = st.checkbox(
+                    "Corrigir quebras de linha",
+                    value=True
+                )
+
+                usar_espacos = st.checkbox(
+                    "Normalizar espaços",
+                    value=True
+                )
 
             texto_limpo = limpar_texto(
                 texto_bruto,
@@ -120,7 +127,8 @@ if uploaded_file:
             st.text_area(
                 "",
                 texto_final,
-                height=500
+                height=500,
+                key="texto_limpo"
             )
 
         idioma = detetar_idioma(texto_final)
@@ -142,7 +150,8 @@ if uploaded_file:
                 st.text_area(
                     f"Chunk {i+1}",
                     chunk,
-                    height=150
+                    height=150,
+                    key=f"chunk_{i}"
                 )
 
         with aba5:
@@ -156,7 +165,8 @@ if uploaded_file:
                 st.text_area(
                     f"Prompt {i+1}",
                     prompt,
-                    height=200
+                    height=200,
+                    key=f"prompt_{i}"
                 )
 
     except Exception as erro:
