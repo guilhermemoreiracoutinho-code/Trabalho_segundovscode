@@ -4,9 +4,11 @@ from langdetect import detect
 def detetar_idioma(texto):
 
     try:
+
         return detect(texto)
 
     except:
+
         return "desconhecido"
 
 
@@ -50,8 +52,8 @@ Objetivos:
 - corrigir erros gramaticais
 - melhorar pontuação
 - remover artefactos textuais
-- devolver em plain text
-- manter significado original
+- devolver o texto em plain text
+- manter o significado original
 
 Texto:
 {texto}
