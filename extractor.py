@@ -2,11 +2,11 @@ import pdfplumber
 from docx import Document
 
 
-def extrair_pdf(caminho):
+def extrair_pdf(ficheiro):
 
     texto = ""
 
-    with pdfplumber.open(caminho) as pdf:
+    with pdfplumber.open(ficheiro) as pdf:
 
         for pagina in pdf.pages:
 
@@ -18,9 +18,9 @@ def extrair_pdf(caminho):
     return texto
 
 
-def extrair_docx(caminho):
+def extrair_docx(ficheiro):
 
-    doc = Document(caminho)
+    doc = Document(ficheiro)
 
     texto = ""
 
@@ -30,22 +30,26 @@ def extrair_docx(caminho):
     return texto
 
 
-def extrair_txt(caminho):
+def extrair_txt(ficheiro):
 
-    with open(caminho, "r", encoding="utf-8", errors="replace") as ficheiro:
-        return ficheiro.read()
+    return ficheiro.read().decode(
+        "utf-8",
+        errors="replace"
+    )
 
 
-def extrair_texto(caminho):
+def extrair_texto(ficheiro):
 
-    if caminho.endswith(".pdf"):
-        return extrair_pdf(caminho)
+    nome = ficheiro.name.lower()
 
-    elif caminho.endswith(".docx"):
-        return extrair_docx(caminho)
+    if nome.endswith(".pdf"):
+        return extrair_pdf(ficheiro)
 
-    elif caminho.endswith(".txt"):
-        return extrair_txt(caminho)
+    elif nome.endswith(".docx"):
+        return extrair_docx(ficheiro)
+
+    elif nome.endswith(".txt"):
+        return extrair_txt(ficheiro)
 
     else:
         return "Formato não suportado."

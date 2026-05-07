@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 
 from extractor import extrair_texto
@@ -32,15 +31,9 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file:
 
-    caminho = uploaded_file.name
-
-    with open(caminho, "wb") as f:
-
-        f.write(uploaded_file.getbuffer())
-
     try:
 
-        texto_bruto = extrair_texto(caminho)
+        texto_bruto = extrair_texto(uploaded_file)
 
         aba1, aba2, aba3, aba4, aba5 = st.tabs([
             "Texto Original",
@@ -66,27 +59,27 @@ if uploaded_file:
 
             usar_artefactos = st.sidebar.checkbox(
                 "Remover artefactos",
-                False
+                True
             )
 
             usar_cabecalhos = st.sidebar.checkbox(
                 "Remover cabeçalhos",
-                False
+                True
             )
 
             usar_paragrafos = st.sidebar.checkbox(
                 "Reconstruir parágrafos",
-                False
+                True
             )
 
             usar_quebras = st.sidebar.checkbox(
                 "Corrigir quebras de linha",
-                False
+                True
             )
 
             usar_espacos = st.sidebar.checkbox(
                 "Normalizar espaços",
-                False
+                True
             )
 
             texto_limpo = limpar_texto(
@@ -117,10 +110,9 @@ if uploaded_file:
             if usar_espacos:
                 melhorias.append("Espaços")
 
-            titulo = "Texto limpo"
+            titulo = "Texto Após Limpeza"
 
             if melhorias:
-
                 titulo += ": " + ", ".join(melhorias)
 
             st.subheader(titulo)
@@ -170,7 +162,3 @@ if uploaded_file:
     except Exception as erro:
 
         st.error(f"Erro: {erro}")
-
-    finally:
-
-        os.remove(caminho)

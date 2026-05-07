@@ -14,10 +14,14 @@ def detetar_idioma(texto):
 
 def formatar_texto(texto):
 
-    return texto.strip()
+    texto = texto.strip()
+
+    texto = texto.replace("\t", " ")
+
+    return texto
 
 
-def criar_chunks(texto, tamanho=500):
+def criar_chunks(texto, tamanho=1000):
 
     palavras = texto.split()
 
@@ -27,7 +31,7 @@ def criar_chunks(texto, tamanho=500):
 
     for palavra in palavras:
 
-        if len(chunk) + len(palavra) < tamanho:
+        if len(chunk) + len(palavra) + 1 < tamanho:
 
             chunk += palavra + " "
 
