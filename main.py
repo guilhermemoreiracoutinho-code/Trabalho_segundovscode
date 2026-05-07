@@ -1,3 +1,5 @@
+from hashlib import sha1
+
 import streamlit as st
 
 from extractor import extrair_texto
@@ -23,6 +25,11 @@ st.write(
 )
 
 
+def criar_key(prefixo, texto):
+    resumo = sha1(texto.encode("utf-8")).hexdigest()[:12]
+    return f"{prefixo}_{resumo}"
+
+
 uploaded_file = st.file_uploader(
     "Carrega um ficheiro",
     type=["pdf", "docx", "txt"]
@@ -30,10 +37,12 @@ uploaded_file = st.file_uploader(
 
 
 if uploaded_file:
-
     try:
-
         texto_bruto = extrair_texto(uploaded_file)
+
+        if not texto_bruto.strip():
+            st.warning("Não foi encontrado texto no ficheiro carregado.")
+            st.stop()
 
         aba1, aba2, aba3, aba4, aba5 = st.tabs([
             "Texto Original",
@@ -44,24 +53,20 @@ if uploaded_file:
         ])
 
         with aba1:
-
             st.subheader("Texto Original")
-
             st.text_area(
                 "",
                 texto_bruto,
                 height=500,
-                key="texto_original"
+                key=criar_key("texto_original", texto_bruto)
             )
 
         with aba2:
-
             st.subheader("Configuração da Pipeline")
 
             col1, col2 = st.columns(2)
 
             with col1:
-
                 usar_artefactos = st.checkbox(
                     "Remover artefactos",
                     value=True
@@ -78,7 +83,6 @@ if uploaded_file:
                 )
 
             with col2:
-
                 usar_quebras = st.checkbox(
                     "Corrigir quebras de linha",
                     value=True
@@ -124,51 +128,52 @@ if uploaded_file:
 
             st.subheader(titulo)
 
+            if not texto_final:
+                st.warning("O texto ficou vazio após a limpeza.")
+
             st.text_area(
                 "",
                 texto_final,
                 height=500,
-                key="texto_limpo"
+                key=criar_key("texto_limpo", texto_final)
             )
 
         idioma = detetar_idioma(texto_final)
-
         chunks = criar_chunks(texto_final)
 
         with aba3:
-
             st.subheader("Idioma Detetado")
-
             st.success(idioma)
 
         with aba4:
-
             st.subheader("Chunks Gerados")
 
-            for i, chunk in enumerate(chunks):
+            if not chunks:
+                st.warning("Não foram gerados chunks porque o texto limpo está vazio.")
 
+            for i, chunk in enumerate(chunks):
                 st.text_area(
-                    f"Chunk {i+1}",
+                    f"Chunk {i + 1}",
                     chunk,
                     height=150,
-                    key=f"chunk_{i}"
+                    key=criar_key(f"chunk_{i}", chunk)
                 )
 
         with aba5:
-
             st.subheader("Prompts Gerados")
 
-            for i, chunk in enumerate(chunks):
+            if not chunks:
+                st.warning("Não há prompts para gerar porque não existem chunks.")
 
+            for i, chunk in enumerate(chunks):
                 prompt = criar_prompt(chunk, idioma)
 
                 st.text_area(
-                    f"Prompt {i+1}",
+                    f"Prompt {i + 1}",
                     prompt,
                     height=200,
-                    key=f"prompt_{i}"
+                    key=criar_key(f"prompt_{i}", prompt)
                 )
 
     except Exception as erro:
-
         st.error(f"Erro: {erro}")
