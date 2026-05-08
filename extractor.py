@@ -3,16 +3,11 @@ from docx import Document
 
 
 def extrair_pdf(ficheiro):
-    texto = ""
-
     with pdfplumber.open(ficheiro) as pdf:
-        for pagina in pdf.pages:
-            conteudo = pagina.extract_text()
-
-            if conteudo:
-                texto += conteudo + "\n"
-
-    texto = texto.strip()
+        texto = "\n".join(
+            pagina.extract_text() or ""
+            for pagina in pdf.pages
+        ).strip()
 
     if not texto:
         raise ValueError("Não foi possível extrair texto do PDF.")
@@ -21,13 +16,10 @@ def extrair_pdf(ficheiro):
 
 
 def extrair_docx(ficheiro):
-    doc = Document(ficheiro)
-    texto = ""
-
-    for paragrafo in doc.paragraphs:
-        texto += paragrafo.text + "\n"
-
-    texto = texto.strip()
+    texto = "\n".join(
+        paragrafo.text
+        for paragrafo in Document(ficheiro).paragraphs
+    ).strip()
 
     if not texto:
         raise ValueError("Não foi possível extrair texto do ficheiro DOCX.")
@@ -43,14 +35,12 @@ def extrair_txt(ficheiro):
 
     for codificacao in ("utf-8", "utf-8-sig", "latin-1"):
         try:
-            texto = conteudo.decode(codificacao)
+            texto = conteudo.decode(codificacao).strip()
             break
         except UnicodeDecodeError:
             continue
     else:
-        texto = conteudo.decode("utf-8", errors="replace")
-
-    texto = texto.strip()
+        texto = conteudo.decode("utf-8", errors="replace").strip()
 
     if not texto:
         raise ValueError("O ficheiro TXT não contém texto legível.")
@@ -63,10 +53,8 @@ def extrair_texto(ficheiro):
 
     if nome.endswith(".pdf"):
         return extrair_pdf(ficheiro)
-
     if nome.endswith(".docx"):
         return extrair_docx(ficheiro)
-
     if nome.endswith(".txt"):
         return extrair_txt(ficheiro)
 

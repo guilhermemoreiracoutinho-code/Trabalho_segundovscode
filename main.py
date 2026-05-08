@@ -1,16 +1,8 @@
-from hashlib import sha1
-
 import streamlit as st
 
-from extractor import extrair_texto
 from cleaner import limpar_texto
-
-from processor import (
-    detetar_idioma,
-    criar_chunks,
-    criar_prompt,
-    formatar_texto
-)
+from extractor import extrair_texto
+from processor import criar_chunks, criar_prompt, detetar_idioma
 
 
 st.set_page_config(
@@ -18,33 +10,23 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("Normalização de Texto com Pipeline de Pré-Processamento e SLMs")
+st.title("Normalização de Texto com Pipeline de Pré-Processamento")
+st.write("Aplicação para extração, limpeza, segmentação e preparação de texto para SLMs.")
 
-st.write(
-    "Aplicação para extração, limpeza e preparação de texto para SLMs."
-)
-
-
-def criar_key(prefixo, texto):
-    resumo = sha1(texto.encode("utf-8")).hexdigest()[:12]
-    return f"{prefixo}_{resumo}"
-
-
-uploaded_file = st.file_uploader(
+ficheiro = st.file_uploader(
     "Carrega um ficheiro",
     type=["pdf", "docx", "txt"]
 )
 
-
-if uploaded_file:
+if ficheiro:
     try:
-        texto_bruto = extrair_texto(uploaded_file)
+        texto_bruto = extrair_texto(ficheiro)
 
         if not texto_bruto.strip():
             st.warning("Não foi encontrado texto no ficheiro carregado.")
             st.stop()
 
-        aba1, aba2, aba3, aba4, aba5 = st.tabs([
+        aba_original, aba_limpo, aba_idioma, aba_chunks, aba_prompts = st.tabs([
             "Texto Original",
             "Texto Limpo",
             "Idioma",
@@ -52,46 +34,21 @@ if uploaded_file:
             "Prompts"
         ])
 
-        with aba1:
-            st.subheader("Texto Original")
-            st.text_area(
-                "",
-                texto_bruto,
-                height=500,
-                key=criar_key("texto_original", texto_bruto)
-            )
+        with aba_original:
+            st.text_area("Texto original", texto_bruto, height=500)
 
-        with aba2:
-            st.subheader("Configuração da Pipeline")
+        with aba_limpo:
+            with st.expander("Configuração da Pipeline", expanded=True):
+                col1, col2 = st.columns(2)
 
-            col1, col2 = st.columns(2)
+                with col1:
+                    usar_artefactos = st.toggle("Remover artefactos")
+                    usar_cabecalhos = st.toggle("Remover cabeçalhos e rodapés")
+                    usar_paragrafos = st.toggle("Reconstruir parágrafos")
 
-            with col1:
-                usar_artefactos = st.checkbox(
-                    "Remover artefactos",
-                    value=False
-                )
-
-                usar_cabecalhos = st.checkbox(
-                    "Remover cabeçalhos",
-                    value=False
-                )
-
-                usar_paragrafos = st.checkbox(
-                    "Reconstruir parágrafos",
-                    value=False
-                )
-
-            with col2:
-                usar_quebras = st.checkbox(
-                    "Corrigir quebras de linha",
-                    value=False
-                )
-
-                usar_espacos = st.checkbox(
-                    "Normalizar espaços",
-                    value=False
-                )
+                with col2:
+                    usar_quebras = st.toggle("Corrigir quebras de linha")
+                    usar_espacos = st.toggle("Normalizar espaços")
 
             texto_limpo = limpar_texto(
                 texto_bruto,
@@ -100,79 +57,37 @@ if uploaded_file:
                 usar_paragrafos,
                 usar_quebras,
                 usar_espacos
-            )
+            ).strip()
 
-            texto_final = formatar_texto(texto_limpo)
+            st.text_area("Texto limpo", texto_limpo, height=500)
 
-            melhorias = []
+        idioma = detetar_idioma(texto_limpo)
+        chunks = criar_chunks(texto_limpo)
 
-            if usar_artefactos:
-                melhorias.append("Artefactos")
-
-            if usar_cabecalhos:
-                melhorias.append("Cabeçalhos")
-
-            if usar_paragrafos:
-                melhorias.append("Parágrafos")
-
-            if usar_quebras:
-                melhorias.append("Quebras")
-
-            if usar_espacos:
-                melhorias.append("Espaços")
-
-            titulo = "Texto Após Limpeza"
-
-            if melhorias:
-                titulo += ": " + ", ".join(melhorias)
-
-            st.subheader(titulo)
-
-            if not texto_final:
-                st.warning("O texto ficou vazio após a limpeza.")
-
-            st.text_area(
-                "",
-                texto_final,
-                height=500,
-                key=criar_key("texto_limpo", texto_final)
-            )
-
-        idioma = detetar_idioma(texto_final)
-        chunks = criar_chunks(texto_final)
-
-        with aba3:
+        with aba_idioma:
             st.subheader("Idioma Detetado")
             st.success(idioma)
 
-        with aba4:
+        with aba_chunks:
             st.subheader("Chunks Gerados")
 
             if not chunks:
                 st.warning("Não foram gerados chunks porque o texto limpo está vazio.")
 
-            for i, chunk in enumerate(chunks):
-                st.text_area(
-                    f"Chunk {i + 1}",
-                    chunk,
-                    height=150,
-                    key=criar_key(f"chunk_{i}", chunk)
-                )
+            for i, chunk in enumerate(chunks, start=1):
+                st.text_area(f"Chunk {i}", chunk, height=150)
 
-        with aba5:
+        with aba_prompts:
             st.subheader("Prompts Gerados")
 
             if not chunks:
                 st.warning("Não há prompts para gerar porque não existem chunks.")
 
-            for i, chunk in enumerate(chunks):
-                prompt = criar_prompt(chunk, idioma)
-
+            for i, chunk in enumerate(chunks, start=1):
                 st.text_area(
-                    f"Prompt {i + 1}",
-                    prompt,
-                    height=200,
-                    key=criar_key(f"prompt_{i}", prompt)
+                    f"Prompt {i}",
+                    criar_prompt(chunk, idioma),
+                    height=200
                 )
 
     except Exception as erro:
