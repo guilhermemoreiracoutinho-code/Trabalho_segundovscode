@@ -6,7 +6,7 @@ LETRAS = r"A-Za-zÀ-ÖØ-öø-ÿ"
 
 
 def corrigir_encoding(texto):
-    """Corrige casos comuns de acentuação estragada, como 'NormalizaÃ§Ã£o'."""
+    """Corrige casos comuns de acentuação estragada"""
     if "Ã" not in texto and "Â" not in texto:
         return texto
 
