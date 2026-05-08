@@ -3,11 +3,16 @@ from docx import Document
 
 
 def extrair_pdf(ficheiro):
+    texto = ""
+
     with pdfplumber.open(ficheiro) as pdf:
-        texto = "\n".join(
-            pagina.extract_text() or ""
-            for pagina in pdf.pages
-        ).strip()
+        for pagina in pdf.pages:
+            conteudo = pagina.extract_text()
+
+            if conteudo:
+                texto += conteudo + "\n"
+
+    texto = texto.strip()
 
     if not texto:
         raise ValueError("Não foi possível extrair texto do PDF.")
@@ -16,10 +21,13 @@ def extrair_pdf(ficheiro):
 
 
 def extrair_docx(ficheiro):
-    texto = "\n".join(
-        paragrafo.text
-        for paragrafo in Document(ficheiro).paragraphs
-    ).strip()
+    documento = Document(ficheiro)
+    texto = ""
+
+    for paragrafo in documento.paragraphs:
+        texto += paragrafo.text + "\n"
+
+    texto = texto.strip()
 
     if not texto:
         raise ValueError("Não foi possível extrair texto do ficheiro DOCX.")

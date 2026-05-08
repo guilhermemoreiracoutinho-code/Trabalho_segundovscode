@@ -12,11 +12,10 @@ def detetar_idioma(texto):
 
 
 def criar_chunks(texto, tamanho=1000):
-    palavras = texto.split()
     chunks = []
     chunk = ""
 
-    for palavra in palavras:
+    for palavra in texto.split():
         if len(chunk) + len(palavra) + 1 <= tamanho:
             chunk += palavra + " "
         else:
@@ -28,12 +27,3 @@ def criar_chunks(texto, tamanho=1000):
         chunks.append(chunk.strip())
 
     return chunks
-
-
-def criar_prompt(texto, idioma):
-    return (
-        f"Normaliza o texto seguinte em {idioma}. "
-        "Corrige gramática, pontuação e artefactos, mantendo o significado. "
-        "Devolve apenas plain text.\n\n"
-        f"{texto}"
-    )

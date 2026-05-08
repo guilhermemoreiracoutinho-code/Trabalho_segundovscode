@@ -2,7 +2,7 @@ import streamlit as st
 
 from cleaner import limpar_texto
 from extractor import extrair_texto
-from processor import criar_chunks, criar_prompt, detetar_idioma
+from processor import criar_chunks, detetar_idioma
 
 
 st.set_page_config(
@@ -11,7 +11,7 @@ st.set_page_config(
 )
 
 st.title("Normalização de Texto com Pipeline de Pré-Processamento")
-st.write("Aplicação para extração, limpeza, segmentação e preparação de texto para SLMs.")
+st.write("Aplicação para extrair, limpar, segmentar e preparar texto para SLMs.")
 
 ficheiro = st.file_uploader(
     "Carrega um ficheiro",
@@ -21,10 +21,6 @@ ficheiro = st.file_uploader(
 if ficheiro:
     try:
         texto_bruto = extrair_texto(ficheiro)
-
-        if not texto_bruto.strip():
-            st.warning("Não foi encontrado texto no ficheiro carregado.")
-            st.stop()
 
         aba_original, aba_limpo, aba_idioma, aba_chunks, aba_prompts = st.tabs([
             "Texto Original",
@@ -42,13 +38,13 @@ if ficheiro:
                 col1, col2 = st.columns(2)
 
                 with col1:
-                    usar_artefactos = st.toggle("Remover artefactos")
-                    usar_cabecalhos = st.toggle("Remover cabeçalhos e rodapés")
-                    usar_paragrafos = st.toggle("Reconstruir parágrafos")
+                    usar_artefactos = st.toggle("Remover artefactos", value=True)
+                    usar_cabecalhos = st.toggle("Remover cabeçalhos e rodapés", value=True)
+                    usar_paragrafos = st.toggle("Reconstruir parágrafos", value=True)
 
                 with col2:
-                    usar_quebras = st.toggle("Corrigir quebras de linha")
-                    usar_espacos = st.toggle("Normalizar espaços")
+                    usar_quebras = st.toggle("Corrigir quebras de linha", value=True)
+                    usar_espacos = st.toggle("Normalizar espaços", value=True)
 
             texto_limpo = limpar_texto(
                 texto_bruto,
@@ -57,7 +53,10 @@ if ficheiro:
                 usar_paragrafos,
                 usar_quebras,
                 usar_espacos
-            ).strip()
+            )
+
+            if not texto_limpo:
+                st.warning("O texto ficou vazio após a limpeza.")
 
             st.text_area("Texto limpo", texto_limpo, height=500)
 
@@ -84,11 +83,7 @@ if ficheiro:
                 st.warning("Não há prompts para gerar porque não existem chunks.")
 
             for i, chunk in enumerate(chunks, start=1):
-                st.text_area(
-                    f"Prompt {i}",
-                    criar_prompt(chunk, idioma),
-                    height=200
-                )
+                st.text_area(f"Prompt {i}", chunk, height=200)
 
     except Exception as erro:
         st.error(f"Erro: {erro}")
