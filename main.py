@@ -38,13 +38,13 @@ if ficheiro:
                 col1, col2 = st.columns(2)
 
                 with col1:
-                    usar_artefactos = st.toggle("Remover artefactos", value=True)
-                    usar_cabecalhos = st.toggle("Remover cabeçalhos e rodapés", value=True)
-                    usar_paragrafos = st.toggle("Reconstruir parágrafos", value=True)
+                    usar_artefactos = st.toggle("Remover artefactos", value=False)
+                    usar_cabecalhos = st.toggle("Remover cabeçalhos e rodapés", value=False)
+                    usar_paragrafos = st.toggle("Reconstruir parágrafos", value=False)
 
                 with col2:
-                    usar_quebras = st.toggle("Corrigir quebras de linha", value=True)
-                    usar_espacos = st.toggle("Normalizar espaços", value=True)
+                    usar_quebras = st.toggle("Corrigir quebras de linha", value=False)
+                    usar_espacos = st.toggle("Normalizar espaços", value=False)
 
             texto_limpo = limpar_texto(
                 texto_bruto,
