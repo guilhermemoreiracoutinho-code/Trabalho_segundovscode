@@ -55,6 +55,19 @@ if ficheiro:
                 usar_espacos
             )
 
+            etapas_ativas = []
+
+            if usar_artefactos:
+                etapas_ativas.append("artefactos")
+            if usar_cabecalhos:
+                etapas_ativas.append("cabeçalhos/rodapés")
+            if usar_paragrafos:
+                etapas_ativas.append("parágrafos")
+            if usar_quebras:
+                etapas_ativas.append("quebras de linha")
+            if usar_espacos:
+                etapas_ativas.append("espaços")
+
             if not texto_limpo:
                 st.warning("O texto ficou vazio após a limpeza.")
 
@@ -62,6 +75,7 @@ if ficheiro:
 
         idioma = detetar_idioma(texto_limpo)
         chunks = criar_chunks(texto_limpo)
+        etapas_texto = ", ".join(etapas_ativas) if etapas_ativas else "nenhuma"
 
         with aba_idioma:
             st.subheader("Idioma Detetado")
@@ -78,6 +92,7 @@ if ficheiro:
 
         with aba_prompts:
             st.subheader("Prompts Gerados")
+            st.caption(f"Os prompts usam o texto limpo com estas etapas: {etapas_texto}.")
 
             if not chunks:
                 st.warning("Não há prompts para gerar porque não existem chunks.")
