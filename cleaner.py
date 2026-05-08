@@ -100,11 +100,11 @@ def normalizar_texto(texto):
 
 def limpar_texto(
     texto,
-    usar_artefactos=True,
-    usar_cabecalhos=True,
-    usar_paragrafos=True,
-    usar_quebras=True,
-    usar_espacos=True
+    usar_artefactos=False,
+    usar_cabecalhos=False,
+    usar_paragrafos=False,
+    usar_quebras=False,
+    usar_espacos=False
 ):
     if not texto:
         return ""
