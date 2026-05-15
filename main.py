@@ -3,6 +3,7 @@ import streamlit as st
 from cleaner import limpar_texto
 from extractor import extrair_texto
 from processor import criar_chunks, detetar_idioma
+from slm import criar_prompt, enviar_para_slm
 
 
 st.set_page_config(
@@ -22,12 +23,13 @@ if ficheiro:
     try:
         texto_bruto = extrair_texto(ficheiro)
 
-        aba_original, aba_limpo, aba_idioma, aba_chunks, aba_prompts = st.tabs([
+        aba_original, aba_limpo, aba_idioma, aba_chunks, aba_prompts, aba_slm = st.tabs([
             "Texto Original",
             "Texto Limpo",
             "Idioma",
             "Chunks",
-            "Prompts"
+            "Prompts",
+            "SLM"
         ])
 
         with aba_original:
@@ -98,7 +100,33 @@ if ficheiro:
                 st.warning("Não há prompts para gerar porque não existem chunks.")
 
             for i, chunk in enumerate(chunks, start=1):
-                st.text_area(f"Prompt {i}", chunk, height=200)
+                st.text_area(f"Prompt {i}", criar_prompt(chunk), height=200)
+
+        with aba_slm:
+            st.subheader("Enviar para o SLM")
+
+            if not chunks:
+                st.warning("Não há texto limpo para enviar ao SLM.")
+            else:
+                numero_chunk = st.selectbox(
+                    "Escolhe o chunk para enviar",
+                    range(1, len(chunks) + 1)
+                )
+
+                chunk_escolhido = chunks[numero_chunk - 1]
+                prompt = criar_prompt(chunk_escolhido)
+
+                st.text_area("Prompt enviado à API", prompt, height=200)
+
+                if st.button("Enviar pedido ao SLM"):
+                    try:
+                        with st.spinner("A aguardar resposta do SLM..."):
+                            resposta = enviar_para_slm(chunk_escolhido)
+
+                        st.success("Resposta recebida.")
+                        st.text_area("Resposta do SLM", resposta, height=300)
+                    except Exception as erro_slm:
+                        st.error(f"Erro ao contactar o SLM: {erro_slm}")
 
     except Exception as erro:
         st.error(f"Erro: {erro}")
