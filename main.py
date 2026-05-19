@@ -7,6 +7,16 @@ from report import avaliar_normalizacao, gerar_relatorio_html
 from slm import criar_prompt, enviar_para_slm
 
 
+def mostrar_blocos(titulo, blocos, altura=150):
+    st.subheader(titulo)
+
+    if not blocos:
+        st.warning("Não há conteúdo para mostrar.")
+
+    for i, bloco in enumerate(blocos, start=1):
+        st.text_area(f"{titulo[:-1]} {i}", bloco, height=altura)
+
+
 st.set_page_config(
     page_title="TP2 - Pipeline de Texto",
     layout="wide"
@@ -16,7 +26,7 @@ st.title("Normalização de Texto com Pipeline de Pré-Processamento")
 st.write("Aplicação para extrair, limpar, segmentar e preparar texto para SLMs.")
 
 ficheiro = st.file_uploader(
-    "Carrega um ficheiro",
+    "Carrega um ficheiro ou arrasta-o para a caixa abaixo",
     type=["pdf", "docx", "txt"]
 )
 
@@ -76,6 +86,7 @@ if ficheiro:
 
         idioma = detetar_idioma(texto_limpo)
         chunks = criar_chunks(texto_limpo)
+        prompts = [criar_prompt(chunk) for chunk in chunks]
         etapas_ativas = [nome for nome, ativo in parametros.items() if ativo]
         etapas_texto = ", ".join(etapas_ativas) if etapas_ativas else "nenhuma"
 
@@ -84,23 +95,11 @@ if ficheiro:
             st.success(idioma)
 
         with aba_chunks:
-            st.subheader("Chunks Gerados")
-
-            if not chunks:
-                st.warning("Não foram gerados chunks porque o texto limpo está vazio.")
-
-            for i, chunk in enumerate(chunks, start=1):
-                st.text_area(f"Chunk {i}", chunk, height=150)
+            mostrar_blocos("Chunks", chunks)
 
         with aba_prompts:
-            st.subheader("Prompts Gerados")
             st.caption(f"Os prompts usam o texto limpo com estas etapas: {etapas_texto}.")
-
-            if not chunks:
-                st.warning("Não há prompts para gerar porque não existem chunks.")
-
-            for i, chunk in enumerate(chunks, start=1):
-                st.text_area(f"Prompt {i}", criar_prompt(chunk), height=200)
+            mostrar_blocos("Prompts", prompts, altura=200)
 
         with aba_slm:
             st.subheader("Enviar para o SLM")
