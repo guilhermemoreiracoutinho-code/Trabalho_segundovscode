@@ -3,6 +3,7 @@ import streamlit as st
 from cleaner import limpar_texto
 from extractor import extrair_texto
 from processor import criar_chunks, detetar_idioma
+from report import avaliar_normalizacao, gerar_relatorio_html
 from slm import criar_prompt, enviar_para_slm
 
 
@@ -23,14 +24,17 @@ if ficheiro:
     try:
         texto_bruto = extrair_texto(ficheiro)
 
-        aba_original, aba_limpo, aba_idioma, aba_chunks, aba_prompts, aba_slm = st.tabs([
+        abas = st.tabs([
             "Texto Original",
             "Texto Limpo",
             "Idioma",
             "Chunks",
             "Prompts",
-            "SLM"
+            "SLM",
+            "Relatório"
         ])
+
+        aba_original, aba_limpo, aba_idioma, aba_chunks, aba_prompts, aba_slm, aba_relatorio = abas
 
         with aba_original:
             st.text_area("Texto original", texto_bruto, height=500)
@@ -48,6 +52,14 @@ if ficheiro:
                     usar_quebras = st.toggle("Corrigir quebras de linha", value=False)
                     usar_espacos = st.toggle("Normalizar espaços", value=False)
 
+            parametros = {
+                "Remoção de artefactos": usar_artefactos,
+                "Remoção de cabeçalhos e rodapés": usar_cabecalhos,
+                "Reconstrução de parágrafos": usar_paragrafos,
+                "Correção de quebras de linha": usar_quebras,
+                "Normalização de espaços": usar_espacos,
+            }
+
             texto_limpo = limpar_texto(
                 texto_bruto,
                 usar_artefactos,
@@ -57,19 +69,6 @@ if ficheiro:
                 usar_espacos
             )
 
-            etapas_ativas = []
-
-            if usar_artefactos:
-                etapas_ativas.append("artefactos")
-            if usar_cabecalhos:
-                etapas_ativas.append("cabeçalhos/rodapés")
-            if usar_paragrafos:
-                etapas_ativas.append("parágrafos")
-            if usar_quebras:
-                etapas_ativas.append("quebras de linha")
-            if usar_espacos:
-                etapas_ativas.append("espaços")
-
             if not texto_limpo:
                 st.warning("O texto ficou vazio após a limpeza.")
 
@@ -77,6 +76,7 @@ if ficheiro:
 
         idioma = detetar_idioma(texto_limpo)
         chunks = criar_chunks(texto_limpo)
+        etapas_ativas = [nome for nome, ativo in parametros.items() if ativo]
         etapas_texto = ", ".join(etapas_ativas) if etapas_ativas else "nenhuma"
 
         with aba_idioma:
@@ -127,6 +127,31 @@ if ficheiro:
                         st.text_area("Resposta do SLM", resposta, height=300)
                     except Exception as erro_slm:
                         st.error(f"Erro ao contactar o SLM: {erro_slm}")
+
+        with aba_relatorio:
+            st.subheader("Relatório Automático")
+            avaliacao = avaliar_normalizacao(texto_bruto, texto_limpo)
+
+            st.write(f"Etapas aplicadas: {etapas_texto}")
+            st.write(f"Palavras antes/depois: {avaliacao['palavras_antes']} / {avaliacao['palavras_depois']}")
+            st.write(f"Caracteres antes/depois: {avaliacao['caracteres_antes']} / {avaliacao['caracteres_depois']}")
+            st.write(f"Diferença de caracteres: {avaliacao['diferenca']}")
+
+            relatorio_html = gerar_relatorio_html(
+                ficheiro.name,
+                parametros,
+                texto_bruto,
+                texto_limpo,
+                idioma,
+                chunks
+            )
+
+            st.download_button(
+                "Exportar relatório HTML",
+                data=relatorio_html,
+                file_name="relatorio_pipeline.html",
+                mime="text/html"
+            )
 
     except Exception as erro:
         st.error(f"Erro: {erro}")
