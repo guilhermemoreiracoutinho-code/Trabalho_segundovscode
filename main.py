@@ -33,17 +33,7 @@ ficheiro = st.file_uploader(
 if ficheiro:
     try:
         texto_bruto = extrair_texto(ficheiro)
-
-        abas = st.tabs([
-            "Texto Original",
-            "Texto Limpo",
-            "Idioma",
-            "Chunks",
-            "Prompts",
-            "SLM",
-            "Relatório"
-        ])
-
+        abas = st.tabs(["Texto Original", "Texto Limpo", "Idioma", "Chunks", "Prompts", "SLM", "Relatório"])
         aba_original, aba_limpo, aba_idioma, aba_chunks, aba_prompts, aba_slm, aba_relatorio = abas
 
         with aba_original:
@@ -86,7 +76,6 @@ if ficheiro:
 
         idioma = detetar_idioma(texto_limpo)
         chunks = criar_chunks(texto_limpo)
-        prompts = [criar_prompt(chunk) for chunk in chunks]
         etapas_ativas = [nome for nome, ativo in parametros.items() if ativo]
         etapas_texto = ", ".join(etapas_ativas) if etapas_ativas else "nenhuma"
 
@@ -99,7 +88,7 @@ if ficheiro:
 
         with aba_prompts:
             st.caption(f"Os prompts usam o texto limpo com estas etapas: {etapas_texto}.")
-            mostrar_blocos("Prompts", prompts, altura=200)
+            mostrar_blocos("Prompts", [criar_prompt(chunk) for chunk in chunks], altura=200)
 
         with aba_slm:
             st.subheader("Enviar para o SLM")
@@ -107,11 +96,7 @@ if ficheiro:
             if not chunks:
                 st.warning("Não há texto limpo para enviar ao SLM.")
             else:
-                numero_chunk = st.selectbox(
-                    "Escolhe o chunk para enviar",
-                    range(1, len(chunks) + 1)
-                )
-
+                numero_chunk = st.selectbox("Escolhe o chunk para enviar", range(1, len(chunks) + 1))
                 chunk_escolhido = chunks[numero_chunk - 1]
                 prompt = criar_prompt(chunk_escolhido)
 

@@ -35,6 +35,8 @@ def remover_artefactos(texto):
     texto = re.sub(r"^\s*(p[aá]gina\s*)?\d+\s*(/|de)\s*\d+\s*$", "", texto, flags=re.I | re.M)
     texto = re.sub(r"[^\w\s.,;:!?()\"'\-/%€]", " ", texto)
     texto = re.sub(r"([!?.,;:])\1+", r"\1", texto)
+    texto = re.sub(r"çao\b", lambda p: "ÇÃO" if p.group().isupper() else "ção", texto, flags=re.I)
+    texto = re.sub(r"çoes\b", lambda p: "ÇÕES" if p.group().isupper() else "ções", texto, flags=re.I)
 
     return texto
 
@@ -43,7 +45,6 @@ def remover_cabecalhos_rodapes(texto):
     linhas = texto.splitlines()
     linhas_normalizadas = [re.sub(r"\s+", " ", linha.strip()) for linha in linhas]
     frequencia = Counter(linha for linha in linhas_normalizadas if linha)
-
     resultado = []
 
     for linha, linha_limpa in zip(linhas, linhas_normalizadas):
