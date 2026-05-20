@@ -17,10 +17,7 @@ def mostrar_blocos(titulo, blocos, altura=150):
         st.text_area(f"{titulo[:-1]} {i}", bloco, height=altura)
 
 
-st.set_page_config(
-    page_title="TP2 - Pipeline de Texto",
-    layout="wide"
-)
+st.set_page_config(page_title="TP2 - Pipeline de Texto", layout="wide")
 
 st.title("Normalização de Texto com Pipeline de Pré-Processamento")
 st.write("Aplicação para extrair, limpar, segmentar e preparar texto para SLMs.")
@@ -107,11 +104,7 @@ if ficheiro:
             if not chunks:
                 st.warning("Não há texto limpo para enviar ao SLM.")
             else:
-                numero_chunk = st.selectbox(
-                    "Escolhe o chunk para enviar",
-                    range(1, len(chunks) + 1)
-                )
-
+                numero_chunk = st.selectbox("Escolhe o chunk para enviar", range(1, len(chunks) + 1))
                 chunk_escolhido = chunks[numero_chunk - 1]
                 prompt = criar_prompt(chunk_escolhido)
 
